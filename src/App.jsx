@@ -56,7 +56,7 @@ const App = () => {
 
   useEffect(() => {
     getAllTasks();
-  });
+  }, []);
 
   const handleCompleteTask = (id) => {
     toggleTaskCompletionApi(id)
