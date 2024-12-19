@@ -26,10 +26,21 @@ const getAllTasksApi = () => {
     });
 };
 
-const toggleTaskCompletionApi = id => {
-  return axios.patch(`${kbaseURL}/tasks/${id}`)
+const toggleTaskCompleteApi = id => {
+  return axios.patch(`${kbaseURL}/tasks/${id}/mark_complete`)
     .then( response => {
-      const newTask = convertFromApi(response.data);
+      const newTask = convertFromApi(response.data.task);
+      return newTask;
+    })
+    .catch( error =>{
+      console.log(error);
+    });
+};
+
+const toggleTaskIncompleteApi = id => {
+  return axios.patch(`${kbaseURL}/tasks/${id}/mark_incomplete`)
+    .then( response => {
+      const newTask = convertFromApi(response.data.task);
       return newTask;
     })
     .catch( error =>{
@@ -59,15 +70,16 @@ const App = () => {
   }, []);
 
   const handleCompleteTask = (id) => {
-    toggleTaskCompletionApi(id)
-      .then((apiTask) => {
-        setTaskData(taskData => taskData.map(task =>{
-          if (task.id === id) {
-            return {...task, isComplete: !task.isComplete};
-          } else {
-            return task;
-          }
-        }));
+    const currentTask = taskData.find(task => task.id === id);
+    const apiCall = currentTask.isComplete ? toggleTaskIncompleteApi : toggleTaskCompleteApi;
+    apiCall(id)
+      .then((response) => {
+        setTaskData(taskData => taskData.map(task => 
+          task.id === id ? { ...task, isComplete: response.isComplete } : task
+        ));
+      })
+      .catch(error => {
+        console.error(error);
       });
   };
 
